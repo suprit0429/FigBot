@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import DashboardView from "./components/DashboardView";
@@ -7,19 +7,33 @@ import CreateBotWizard from "./components/CreateBotWizard";
 import Step3CustomizeAndTest from "./components/Step3CustomizeAndTest";
 import ChatbotWidget from "./components/ChatbotWidget";
 import EmbedCodeModal from "./components/EmbedCodeModal";
+import LandingPage from "./components/LandingPage";
+import AuthModal from "./components/AuthModal";
 
 import {
   Search,
   Plus,
   Sparkles,
-  Key,
-  ShieldCheck,
-  Check
+  Key
 } from "lucide-react";
 import { initialBots, initialDocuments } from "./utils/mockData";
 import "./App.css";
 
 export function App() {
+  // Authentication & Session State
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem("docpilot_user");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authInitialMode, setAuthInitialMode] = useState("signin");
+
+  // Navigation & Workspace State
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [bots, setBots] = useState(initialBots);
@@ -56,6 +70,32 @@ export function App() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const handleOpenAuth = (mode = "signin") => {
+    setAuthInitialMode(mode);
+    setAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = (userData) => {
+    setCurrentUser(userData);
+    try {
+      localStorage.setItem("docpilot_user", JSON.stringify(userData));
+    } catch {
+      // ignore storage errors
+    }
+    showToast(`Welcome back, ${userData.name}! Workspace loaded.`);
+    setActiveTab("dashboard");
+  };
+
+  const handleSignOut = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem("docpilot_user");
+    } catch {
+      // ignore storage errors
+    }
+    showToast("Signed out successfully.");
+  };
 
   const handleCreateNewBot = () => {
     setActiveTab("wizard");
@@ -117,10 +157,41 @@ export function App() {
     item.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // If user is not authenticated, render the public Landing Page & Auth Modal
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+        <LandingPage
+          onOpenAuth={handleOpenAuth}
+          onGetStarted={() => handleOpenAuth("signup")}
+        />
+
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          initialMode={authInitialMode}
+          onAuthSuccess={handleAuthSuccess}
+          onShowToast={showToast}
+        />
+
+        {/* Global Toast Notification */}
+        {toastMessage && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 shadow-xl text-xs text-white flex items-center gap-2 animate-in fade-in duration-200">
+            <Sparkles className="w-4 h-4 text-indigo-400" />
+            <span>{toastMessage}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // If user is authenticated, render the full workspace application
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
       {/* Top Navbar */}
       <Navbar
+        user={currentUser}
+        onSignOut={handleSignOut}
         onOpenSearch={() => setSearchModalOpen(true)}
         onCreateBotClick={handleCreateNewBot}
         onOpenNotifications={() => showToast("DocPilot AI engine running at 99.9% uptime.")}
@@ -309,7 +380,7 @@ export function App() {
         </main>
       </div>
 
-      {/* Floating Chatbot Widget Preview (Always Accessible in Bottom Right) */}
+      {/* Floating Chatbot Widget Preview (Always Accessible in Workspace Bottom Right) */}
       <ChatbotWidget
         headerTitle={selectedBot.name || "Support Assistant"}
         themeColor={selectedBot.themeColor || "#6366F1"}

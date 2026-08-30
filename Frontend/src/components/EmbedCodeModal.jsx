@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { X, Copy, Check, Code2, Globe, ShieldCheck } from "lucide-react";
 
 export function EmbedCodeModal({ isOpen, onClose, bot, onShowToast }) {

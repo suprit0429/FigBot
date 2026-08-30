@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Step1BotDetails from "./Step1BotDetails";
 import Step2UploadDoc from "./Step2UploadDoc";
 import Step3CustomizeAndTest from "./Step3CustomizeAndTest";
@@ -13,7 +13,7 @@ export function CreateBotWizard({
   initialData
 }) {
   const [step, setStep] = useState(1);
-  const [botData, setBotData] = useState(
+  const [botData, setBotData] = useState(() =>
     initialData || {
       id: `bot-${Date.now()}`,
       name: "",

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Bot,
   Sparkles,
@@ -43,19 +43,6 @@ export function ChatbotWidget({
   ]);
   const [inputVal, setInputVal] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-
-  // Sync greeting changes immediately
-  React.useEffect(() => {
-    setMessages((prev) => [
-      {
-        id: "init",
-        sender: "bot",
-        text: greeting,
-        timestamp: "Just now"
-      },
-      ...prev.slice(1)
-    ]);
-  }, [greeting]);
 
   const roundingClasses = {
     sharp: "rounded-none",
@@ -243,7 +230,7 @@ export function ChatbotWidget({
                       : "bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none"
                   )}
                 >
-                  <p className="whitespace-pre-wrap">{msg.text}</p>
+                  <p className="whitespace-pre-wrap">{msg.id === "init" ? greeting : msg.text}</p>
 
                   {!isUser && (
                     <button

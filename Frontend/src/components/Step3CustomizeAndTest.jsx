@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ChatbotWidget from "./ChatbotWidget";
 import confetti from "canvas-confetti";
 import {
@@ -72,7 +72,9 @@ export function Step3CustomizeAndTest({
   const handleFinish = () => {
     try {
       confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
-    } catch (e) {}
+    } catch {
+      // ignore confetti errors in unsupported environments
+    }
     if (onShowToast) onShowToast("🎉 Chatbot created and ready to use!");
     if (onComplete) onComplete();
   };

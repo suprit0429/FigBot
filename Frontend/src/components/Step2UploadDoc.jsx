@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { ArrowLeft, ArrowRight, UploadCloud, FileText, Check } from "lucide-react";
 import { cn } from "../utils/cn";
 

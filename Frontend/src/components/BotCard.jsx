@@ -1,4 +1,3 @@
-import React from "react";
 import { Play, Edit3, Code2, Trash2, FileText } from "lucide-react";
 
 export function BotCard({ bot, onTest, onEdit, onEmbed, onDelete }) {
