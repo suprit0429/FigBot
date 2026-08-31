@@ -1,207 +1,325 @@
 import { useReducer, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Bot } from "lucide-react";
 
-const GREETINGS = [
-  "Welcome to DocPilot! I'm your digital assistant. Need answers from your company files? Just ask!",
-  "Upload any PDF or document and I'll answer questions from it instantly — with exact page numbers.",
-  "Your data stays private. I only answer from what you upload, never from the internet.",
+// ── Realistic chat exchange in product preview ──
+const CHAT_MESSAGES = [
+  { role: "user", text: "What's our refund policy for SaaS subscriptions?" },
+  { role: "bot", text: "Per Section 4.2 of your Terms of Service (page 12): customers may request a full refund within 14 days of initial purchase. Renewals are non-refundable.", page: "p.12" },
+  { role: "user", text: "Can resellers access the API tier?" },
+  { role: "bot", text: "Yes - resellers on the Business plan get API rate limits of 10,000 req/day. See the Partner Addendum, Clause 7 (page 31).", page: "p.31" },
 ];
 
-export function HeroSection({ onGetStarted }) {
-  const [state, dispatch] = useReducer(
-    (s, action) => {
-      switch (action.type) {
-        case "RESET":  return { idx: s.idx, typing: true,  text: "" };
-        case "APPEND": return { ...s, text: action.text };
-        case "DONE":   return { ...s, typing: false };
-        case "NEXT":   return { idx: (s.idx + 1) % GREETINGS.length, typing: true, text: "" };
-        default:       return s;
-      }
-    },
-    { idx: 0, typing: true, text: "" }
-  );
-
+function useTypewriter(text, active) {
+  const [displayed, setDisplayed] = useReducer((_, a) => a, "");
   useEffect(() => {
-    dispatch({ type: "RESET" });
-    const words = GREETINGS[state.idx].split(" ");
+    if (!active) { setDisplayed(text); return; }
+    setDisplayed("");
     let i = 0;
     const iv = setInterval(() => {
-      if (i < words.length) {
-        dispatch({ type: "APPEND", text: words.slice(0, i + 1).join(" ") });
-        i++;
-      } else {
-        dispatch({ type: "DONE" });
-        clearInterval(iv);
-        const t = setTimeout(() => dispatch({ type: "NEXT" }), 4000);
-        return () => clearTimeout(t);
-      }
-    }, 38);
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) clearInterval(iv);
+    }, 16);
     return () => clearInterval(iv);
-  }, [state.idx]);
+  }, [text, active]);
+  return displayed;
+}
+
+function ChatBubble({ msg, index, animate }) {
+  const isBot = msg.role === "bot";
+  const text = useTypewriter(msg.text, isBot && animate);
 
   return (
-    <section id="hero" className="relative z-10 pt-28 pb-20 px-6 sm:px-16 max-w-6xl mx-auto">
-
-      {/* ── TOP ROW: Avatar + Speech Bubble ── */}
-      <div className="flex items-start justify-center gap-8 mb-10 flex-wrap">
-
-        {/* Robot Avatar */}
-        <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-          className="relative shrink-0"
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, delay: index * 0.1 }}
+      className={`flex gap-2 ${isBot ? "items-start" : "items-start justify-end"}`}
+    >
+      {isBot && (
+        <div
+          className="shrink-0 w-6 h-6 flex items-center justify-center text-[10px] font-bold mt-0.5 rounded"
+          style={{
+            background: "linear-gradient(135deg, #2563EB, #0284C7)",
+            color: "white",
+          }}
         >
-          {/* Outer glow ring */}
-          <div
-            className="absolute inset-0 rounded-full blur-2xl"
-            style={{ background: "rgba(34,211,238,0.35)", transform: "scale(1.15)" }}
-          />
-          {/* Circle frame */}
-          <div
-            className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full flex items-center justify-center overflow-hidden"
+          D
+        </div>
+      )}
+      <div
+        className="max-w-[84%] px-3 py-2 text-[12px] leading-relaxed"
+        style={{
+          background: isBot ? "#F8FAFC" : "#2563EB",
+          color: isBot ? "#1E293B" : "white",
+          border: isBot ? "1px solid rgba(148,163,184,0.30)" : "none",
+          borderRadius: isBot ? "4px 10px 10px 10px" : "10px 4px 10px 10px",
+        }}
+      >
+        {text || msg.text}
+        {isBot && animate && text.length < msg.text.length && (
+          <span className="animate-blink inline-block w-0.5 h-3 ml-0.5 align-middle bg-blue-500 rounded-full" />
+        )}
+        {isBot && msg.page && (
+          <span
+            className="block mt-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded w-fit"
             style={{
-              background: "linear-gradient(135deg, #22D3EE22, #6366f133)",
-              border: "3px solid rgba(34,211,238,0.6)",
-              boxShadow: "0 0 40px rgba(34,211,238,0.45), inset 0 0 30px rgba(34,211,238,0.08)",
+              background: "#EFF6FF",
+              color: "#2563EB",
+              border: "1px solid rgba(37,99,235,0.20)",
             }}
           >
-            {/* Inner cyan fill */}
-            <div
-              className="absolute inset-3 rounded-full"
-              style={{ background: "linear-gradient(135deg,#22D3EE33,#38BDF822)" }}
+            Source: {msg.page}
+          </span>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+export function HeroSection({ onGetStarted }) {
+  return (
+    <section
+      id="hero"
+      className="relative z-10 pt-32 pb-24 px-6 sm:px-10"
+      style={{ maxWidth: "1100px", margin: "0 auto" }}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-[58fr_42fr] gap-12 lg:gap-16 items-center">
+
+        {/* ── LEFT: Editorial headline ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="space-y-7"
+        >
+          {/* Category badge */}
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest rounded-full"
+            style={{
+              background: "#EFF6FF",
+              border: "1px solid rgba(37,99,235,0.20)",
+              color: "#2563EB",
+            }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: "#2563EB" }}
             />
-            {/* Robot icon */}
-            <div className="relative z-10 flex flex-col items-center gap-1">
-              <Bot
-                className="w-16 h-16 sm:w-20 sm:h-20"
-                style={{
-                  color: "#22D3EE",
-                  filter: "drop-shadow(0 0 16px rgba(34,211,238,0.8))",
-                }}
-              />
-            </div>
+            Document Intelligence
+          </div>
+
+          {/* Headline */}
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(2.6rem, 5.5vw, 4rem)",
+              fontWeight: 900,
+              lineHeight: 1.08,
+              color: "#0F172A",
+              letterSpacing: "-0.025em",
+            }}
+          >
+            Your docs.{" "}
+            <span className="text-gradient-blue">Instant</span>
+            {" "}answers.
+            <br />
+            <span style={{ color: "#64748B" }}>No guessing.</span>
+          </h1>
+
+          {/* Subheadline */}
+          <p
+            className="max-w-md leading-relaxed"
+            style={{ fontSize: "15px", color: "#475569" }}
+          >
+            Upload a PDF, handbook, or internal guide. FiBot builds a chatbot
+            that answers questions from it - citing the exact page, every time.
+            Deploy to your site in under 5 minutes.
+          </p>
+
+          {/* CTAs */}
+          <div className="flex items-center gap-4 flex-wrap pt-1">
+            <button
+              onClick={onGetStarted}
+              className="btn-primary px-7 py-3 text-[14px] font-semibold"
+              style={{
+                borderRadius: "8px",
+                boxShadow: "0 4px 18px rgba(37,99,235,0.30)",
+              }}
+            >
+              Start for free →
+            </button>
+            <button
+              onClick={() => document.getElementById("showcase")?.scrollIntoView({ behavior: "smooth" })}
+              className="btn-ghost-light px-6 py-3 text-[14px] rounded-lg"
+            >
+              See how it works
+            </button>
+          </div>
+
+          {/* Social proof */}
+          <div
+            className="flex items-center gap-6 flex-wrap pt-2"
+            style={{
+              borderTop: "1px solid rgba(148,163,184,0.25)",
+              paddingTop: "20px",
+            }}
+          >
+            {[
+              { val: "6,500+", label: "Documents indexed" },
+              { val: "300+", label: "Teams deployed" },
+              { val: "★ 5.0", label: "Avg. rating" },
+            ].map(({ val, label }) => (
+              <div key={label} className="flex flex-col">
+                <span
+                  style={{
+                    fontFamily: "var(--font-body)",
+                    fontWeight: 700,
+                    fontSize: "18px",
+                    color: "#0F172A",
+                    lineHeight: 1,
+                  }}
+                >
+                  {val}
+                </span>
+                <span style={{ fontSize: "11px", color: "#94A3B8", marginTop: "2px" }}>
+                  {label}
+                </span>
+              </div>
+            ))}
           </div>
         </motion.div>
 
-        {/* Speech Bubble */}
+        {/* ── RIGHT: Product preview card ── */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.92, x: 10 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="relative mt-6"
-          style={{ maxWidth: "360px" }}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.55, delay: 0.15, ease: "easeOut" }}
+          className="relative animate-float"
         >
-          {/* Bubble tail (points left toward robot) */}
+          {/* Ambient glow behind card */}
           <div
-            className="absolute -left-4 top-8 w-0 h-0"
+            aria-hidden
+            className="absolute inset-0 rounded-2xl"
             style={{
-              borderTop: "10px solid transparent",
-              borderBottom: "10px solid transparent",
-              borderRight: "16px solid #fff",
+              background: "radial-gradient(ellipse at 50% 30%, rgba(37,99,235,0.10) 0%, transparent 70%)",
+              transform: "scale(1.15)",
+              filter: "blur(24px)",
             }}
           />
-          {/* Bubble body */}
-          <div
-            className="rounded-2xl p-5 shadow-2xl"
-            style={{ background: "#fff" }}
-          >
-            <p className="text-[14px] font-semibold text-[#0B0F1E] leading-relaxed mb-4">
-              {state.text}
-              {state.typing && (
-                <span
-                  className="inline-block w-1.5 h-4 ml-1 rounded-sm align-middle animate-pulse"
-                  style={{ background: "#22D3EE" }}
-                />
-              )}
-            </p>
 
-            {/* Typing input pill */}
+          {/* Chat preview card */}
+          <div
+            className="relative overflow-hidden"
+            style={{
+              background: "#FFFFFF",
+              border: "1px solid rgba(148,163,184,0.30)",
+              borderRadius: "16px",
+              boxShadow: "0 20px 60px rgba(15,23,42,0.10), 0 0 0 1px rgba(37,99,235,0.06), 0 4px 16px rgba(37,99,235,0.08)",
+            }}
+          >
+            {/* Card header */}
             <div
-              className="flex items-center gap-2 px-4 py-2 rounded-full"
-              style={{ background: "linear-gradient(90deg,#22D3EE,#38BDF8)" }}
+              className="flex items-center justify-between px-4 py-3"
+              style={{
+                borderBottom: "1px solid rgba(148,163,184,0.20)",
+                background: "#F8FAFC",
+              }}
             >
-              <span className="flex gap-1">
-                {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="w-1.5 h-1.5 rounded-full bg-white animate-bounce"
-                    style={{ animationDelay: `${i * 0.15}s` }}
-                  />
-                ))}
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="w-7 h-7 flex items-center justify-center text-[11px] font-bold rounded-lg"
+                  style={{
+                    background: "linear-gradient(135deg, #2563EB, #0284C7)",
+                    color: "white",
+                    boxShadow: "0 2px 8px rgba(37,99,235,0.30)",
+                  }}
+                >
+                  D
+                </div>
+                <div>
+                  <p
+                    className="text-[12px] font-semibold leading-none"
+                    style={{ color: "#0F172A" }}
+                  >
+                    FiBot Assistant
+                  </p>
+                  <p className="text-[10px] mt-0.5" style={{ color: "#94A3B8" }}>
+                    Trained on: Terms-of-Service.pdf
+                  </p>
+                </div>
+              </div>
+              <span
+                className="flex items-center gap-1.5 text-[10px] font-medium px-2 py-1 rounded-full"
+                style={{ background: "#ECFDF5", color: "#10B981" }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full animate-pulse"
+                  style={{ background: "#10B981" }}
+                />
+                Online
               </span>
-              <span className="text-[12px] font-semibold text-white">typing...</span>
+            </div>
+
+            {/* Chat body */}
+            <div className="p-4 space-y-3" style={{ minHeight: "260px", background: "#FAFBFF" }}>
+              {CHAT_MESSAGES.map((msg, i) => (
+                <ChatBubble key={i} msg={msg} index={i} animate={i === 1 || i === 3} />
+              ))}
+            </div>
+
+            {/* Input bar */}
+            <div
+              className="px-4 py-3 flex items-center gap-2"
+              style={{
+                borderTop: "1px solid rgba(148,163,184,0.20)",
+                background: "#FFFFFF",
+              }}
+            >
+              <div
+                className="flex-1 flex items-center gap-2 px-3 py-2 text-[11px] rounded-lg"
+                style={{
+                  background: "#F1F5F9",
+                  border: "1px solid rgba(148,163,184,0.25)",
+                  color: "#94A3B8",
+                }}
+              >
+                Ask anything about this document…
+              </div>
+              <button
+                className="btn-primary w-8 h-8 flex items-center justify-center rounded-lg shrink-0"
+                style={{ padding: 0 }}
+                aria-label="Send"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M1 7h12M8 3l5 4-5 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
             </div>
           </div>
+
+          {/* Floating citation badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.7 }}
+            className="absolute -bottom-4 -right-4 px-3 py-2 rounded-lg"
+            style={{
+              background: "#FFFFFF",
+              border: "1px solid rgba(37,99,235,0.20)",
+              borderRadius: "10px",
+              boxShadow: "0 8px 24px rgba(37,99,235,0.12)",
+            }}
+          >
+            <p className="text-[10px] font-semibold" style={{ color: "#2563EB" }}>
+              📄 Source cited
+            </p>
+            <p className="text-[9px] mt-0.5" style={{ color: "#94A3B8" }}>
+              Terms-of-Service.pdf · p.12
+            </p>
+          </motion.div>
         </motion.div>
       </div>
-
-      {/* ── CENTER: Hero Text + CTAs ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, delay: 0.3 }}
-        className="text-center space-y-5"
-      >
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-          <span className="text-white">Welcome to, Easy</span>
-          <br />
-          <span
-            style={{
-              background: "linear-gradient(90deg,#22D3EE,#38BDF8)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Chat Fast Solution With Our Chatbot
-          </span>
-        </h1>
-
-        <p className="text-[15px] max-w-xl mx-auto leading-relaxed" style={{ color: "#94A3B8" }}>
-          Upload your company documents, handbooks, or guides and get instant,
-          accurate answers with exact page references — no tech setup required.
-        </p>
-
-        <div className="flex items-center justify-center gap-4 pt-2 flex-wrap">
-          <button
-            onClick={onGetStarted}
-            className="px-7 py-3 rounded-full text-[14px] font-bold cursor-pointer transition-all"
-            style={{
-              border: "2px solid rgba(255,255,255,0.3)",
-              color: "#fff",
-              background: "transparent",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#22D3EE";
-              e.currentTarget.style.color = "#22D3EE";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)";
-              e.currentTarget.style.color = "#fff";
-            }}
-          >
-            Get Started
-          </button>
-
-          <button
-            onClick={onGetStarted}
-            className="flex items-center gap-2 px-7 py-3 rounded-full text-[14px] font-bold text-white cursor-pointer transition-all"
-            style={{
-              background: "linear-gradient(90deg,#22D3EE,#38BDF8)",
-              boxShadow: "0 0 24px rgba(34,211,238,0.45)",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.boxShadow = "0 0 40px rgba(34,211,238,0.65)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.boxShadow = "0 0 24px rgba(34,211,238,0.45)")
-            }
-          >
-            Get Premium
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </motion.div>
     </section>
   );
 }

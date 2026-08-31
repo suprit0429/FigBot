@@ -370,7 +370,7 @@ export function ChatbotWidget({
             : "bg-slate-950 text-slate-500 border-slate-850"
         )}
       >
-        ⚡ Powered by <span className="font-semibold">DocPilot AI</span>
+        ⚡ Powered by <span className="font-semibold">FiBot AI</span>
       </div>
     </div>
   );

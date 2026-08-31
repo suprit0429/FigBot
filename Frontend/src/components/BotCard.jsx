@@ -1,77 +1,137 @@
-import { Play, Edit3, Code2, Trash2, FileText } from "lucide-react";
+import { motion } from "framer-motion";
 
-export function BotCard({ bot, onTest, onEdit, onEmbed, onDelete }) {
+export function BotCard({ bot, index = 0, onTest, onEdit, onEmbed, onDelete }) {
+  const initial = bot.name ? bot.name.charAt(0).toUpperCase() : "B";
+  const accentColor = bot.themeColor || "#2563EB";
+
+  const radiusMap = [
+    "4px 14px 14px 14px",
+    "14px",
+    "14px 4px 14px 14px",
+  ];
+  const borderRadius = radiusMap[index % 3];
+
   return (
-    <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all duration-200 flex flex-col justify-between space-y-5 shadow-sm group">
-      {/* Header Info */}
-      <div className="space-y-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 border border-white/10"
-              style={{ backgroundColor: `${bot.themeColor || "#6366F1"}25` }}
-            >
-              {bot.avatar || "🤖"}
-            </div>
-            <div>
-              <h4 className="text-sm font-semibold text-slate-100 group-hover:text-indigo-300 transition-colors line-clamp-1">
-                {bot.name}
-              </h4>
-              <span className="inline-block mt-0.5 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
-                {bot.domain || "Assistant"}
-              </span>
-            </div>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, delay: index * 0.05 }}
+      className="group card-white flex flex-col justify-between transition-all duration-200"
+      style={{
+        borderRadius,
+        padding: "20px",
+        fontFamily: "var(--font-body)",
+        minHeight: index % 3 === 0 ? "200px" : "180px",
+      }}
+    >
+      {/* ── Header ── */}
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-start gap-3">
+          {/* Avatar initial */}
+          <div
+            className="shrink-0 w-9 h-9 flex items-center justify-center text-[13px] font-bold rounded-lg"
+            style={{
+              background: `${accentColor}15`,
+              color: accentColor,
+              border: `1px solid ${accentColor}25`,
+            }}
+          >
+            {initial}
           </div>
-
-          {onDelete && (
-            <button
-              type="button"
-              onClick={() => onDelete(bot.id)}
-              className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-all"
-              title="Delete bot"
+          <div className="min-w-0">
+            <h4
+              className="truncate leading-tight"
+              style={{ fontSize: "13px", fontWeight: 600, color: "#0F172A" }}
             >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          )}
+              {bot.name}
+            </h4>
+            <span
+              className="inline-block mt-1 text-[10px] font-medium px-2 py-0.5 rounded-md"
+              style={{
+                background: "#F1F5F9",
+                color: "#64748B",
+                border: "1px solid rgba(148,163,184,0.30)",
+              }}
+            >
+              {bot.domain || "Assistant"}
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-400 pt-1">
-          <FileText className="w-3.5 h-3.5 text-indigo-400" />
-          <span>{bot.docsCount || 2} documents linked</span>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
+        {/* Delete */}
+        {onDelete && (
           <button
             type="button"
-            onClick={() => onTest && onTest(bot)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 transition-colors"
+            onClick={() => onDelete(bot.id)}
+            className="opacity-0 group-hover:opacity-100 p-1.5 transition-all cursor-pointer rounded-lg"
+            title="Delete bot"
+            style={{ color: "#CBD5E1" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#EF4444";
+              e.currentTarget.style.background = "#FEF2F2";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#CBD5E1";
+              e.currentTarget.style.background = "transparent";
+            }}
           >
-            <Play className="w-3 h-3" />
-            <span>Test</span>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 3.5h10M5 3.5V2.5a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v1M5.5 6v4M8.5 6v4M3 3.5l.5 7a1 1 0 001 1h5a1 1 0 001-1l.5-7" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* Docs count */}
+      <div
+        className="flex items-center gap-1.5 mb-5 text-[11px]"
+        style={{ color: "#94A3B8" }}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+          <rect x="2" y="1" width="7" height="9" rx="1" />
+          <path d="M4 4h3M4 6h3M4 8h2" />
+        </svg>
+        {bot.docsCount || 2} documents linked
+      </div>
+
+      {/* ── Actions ── */}
+      <div
+        className="flex items-center justify-between gap-2 pt-4"
+        style={{ borderTop: "1px solid rgba(148,163,184,0.20)" }}
+      >
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onTest?.(bot)}
+            className="text-[11px] font-medium link-underline cursor-pointer"
+            style={{ color: "#64748B" }}
+          >
+            Test
           </button>
           <button
             type="button"
-            onClick={() => onEdit && onEdit(bot)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-850 hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition-colors"
+            onClick={() => onEdit?.(bot)}
+            className="text-[11px] font-medium link-underline cursor-pointer"
+            style={{ color: "#64748B" }}
           >
-            <Edit3 className="w-3 h-3" />
-            <span>Edit</span>
+            Customize
           </button>
         </div>
 
         <button
           type="button"
-          onClick={() => onEmbed && onEmbed(bot)}
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors"
+          onClick={() => onEmbed?.(bot)}
+          className="btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold cursor-pointer"
+          style={{ borderRadius: "6px" }}
         >
-          <Code2 className="w-3.5 h-3.5" />
-          <span>Embed</span>
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="4 2 1 6 4 10" />
+            <polyline points="8 2 11 6 8 10" />
+          </svg>
+          Embed
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

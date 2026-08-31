@@ -58,7 +58,7 @@ export const initialBots = [
     topK: 3,
     enforceCitations: false,
     persona: "Friendly",
-    greeting: "Welcome to DocPilot! Interested in seeing how our enterprise RAG suite can reduce support tickets by 60%?",
+    greeting: "Welcome to FiBot! Interested in seeing how our enterprise RAG suite can reduce support tickets by 60%?",
     lastActive: "40 mins ago",
     embedSnippet: '<script src="https://cdn.docpilot.ai/widget.js" data-bot-id="bot-3" async></script>'
   },
@@ -275,7 +275,7 @@ export const domainPresets = [
     color: "#10B981",
     desc: "Helps prospective customers understand pricing tiers, feature specs, and integrations.",
     defaultGreeting: "Welcome! Feel free to ask about our platform features, plans, and integrations.",
-    samplePrompt: "Can I connect my self-hosted Pinecone vector database with DocPilot?"
+    samplePrompt: "Can I connect my self-hosted Pinecone vector database with FiBot?"
   },
   {
     id: "policy",
@@ -292,7 +292,7 @@ export const domainPresets = [
     icon: "Sparkles",
     color: "#F43F5E",
     desc: "Blank canvas with fully customizable prompt templates, embeddings, and vector stores.",
-    defaultGreeting: "DocPilot AI ready. Ask me anything about your uploaded repository.",
+    defaultGreeting: "FiBot AI ready. Ask me anything about your uploaded repository.",
     samplePrompt: "Summarize the key takeaways from the Q3 architecture audit."
   }
 ];

@@ -164,7 +164,7 @@ export function AuthModal({
           </div>
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight flex items-center justify-center gap-2">
-              <span>DocPilot AI</span>
+              <span>FiBot AI</span>
               <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
                 Enterprise
               </span>

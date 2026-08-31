@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, Search, Sparkles, Command, Bell, LogOut, ChevronDown, User, Shield } from "lucide-react";
+import { Search, Command, Bell, LogOut, ChevronDown, User, Shield } from "lucide-react";
 
 export function Navbar({
   user = { name: "Arpita", email: "arpita@example.com" },
@@ -10,7 +10,6 @@ export function Navbar({
 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
   const initial = user?.name ? user.name.charAt(0).toUpperCase() : "U";
 
   useEffect(() => {
@@ -19,135 +18,237 @@ export function Navbar({
         setIsDropdownOpen(false);
       }
     }
-    if (isDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    if (isDropdownOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isDropdownOpen]);
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between">
-      {/* Brand & Workspace Title */}
+    <header
+      className="sticky top-0 z-30 h-14 px-4 sm:px-6 flex items-center justify-between"
+      style={{
+        background: "rgba(248,250,252,0.92)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        borderBottom: "1px solid rgba(148,163,184,0.25)",
+        boxShadow: "0 1px 3px rgba(15,23,42,0.06)",
+        fontFamily: "var(--font-body)",
+      }}
+    >
+      {/* ── Brand ── */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white font-bold shadow-lg shadow-indigo-600/25">
-          <Bot className="w-5 h-5" />
-        </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-base tracking-tight text-white">
-              DocPilot <span className="text-cyan-400">AI</span>
-            </span>
-            <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 rounded">
-              Workspace
-            </span>
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-7 h-7 flex items-center justify-center"
+            style={{
+              background: "linear-gradient(135deg, #2563EB, #0284C7)",
+              borderRadius: "7px",
+              boxShadow: "0 2px 8px rgba(37,99,235,0.25)",
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden>
+              <path d="M3 2h4.5C10.54 2 13 4.46 13 7.5S10.54 13 7.5 13H3V2z" fill="white" />
+              <rect x="3" y="2" width="2" height="11" rx="0.5" fill="rgba(37,99,235,0.3)" />
+            </svg>
           </div>
-          <p className="hidden md:block text-[11px] text-slate-400">
-            No-Code AI Chatbot Builder & RAG Widgets
-          </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <span
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 700,
+                  fontSize: "14px",
+                  color: "#0F172A",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                FiBot<span style={{ color: "var(--blue)" }}>.ai</span>
+              </span>
+              <span
+                className="hidden sm:inline-block px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded"
+                style={{
+                  background: "#EFF6FF",
+                  color: "#2563EB",
+                  border: "1px solid rgba(37,99,235,0.20)",
+                }}
+              >
+                Workspace
+              </span>
+            </div>
+            <p className="hidden md:block text-[10px] mt-0.5" style={{ color: "#94A3B8" }}>
+              Document-grounded chatbot builder
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Center: Global Search Bar */}
+      {/* ── Center: Search bar ── */}
       <div className="flex-1 max-w-sm mx-4 hidden md:block">
         <button
           type="button"
           onClick={onOpenSearch}
-          className="w-full flex items-center justify-between px-3.5 py-2 text-xs text-slate-400 bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl transition-all shadow-inner group"
+          className="w-full flex items-center justify-between px-3.5 py-2 text-xs group transition-all"
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid rgba(148,163,184,0.35)",
+            color: "#94A3B8",
+            borderRadius: "8px",
+            boxShadow: "var(--shadow-sm)",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(37,99,235,0.35)")}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(148,163,184,0.35)")}
         >
           <div className="flex items-center gap-2">
-            <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-200" />
-            <span>Search bots or documents...</span>
+            <Search className="w-3.5 h-3.5" />
+            <span>Search bots or documents…</span>
           </div>
-          <kbd className="flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-850 border border-slate-700 rounded">
+          <kbd
+            className="flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono"
+            style={{
+              background: "#F1F5F9",
+              border: "1px solid rgba(148,163,184,0.35)",
+              color: "#94A3B8",
+              borderRadius: "4px",
+            }}
+          >
             <Command className="w-3 h-3 inline" /> K
           </kbd>
         </button>
       </div>
 
-      {/* Right Side: Health Badge, Actions, Profile */}
-      <div className="flex items-center gap-3">
-        {/* System Health Badge */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-medium text-emerald-400">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+      {/* ── Right ── */}
+      <div className="flex items-center gap-2.5">
+        {/* RAG status */}
+        <div
+          className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-medium rounded-full"
+          style={{
+            background: "#ECFDF5",
+            border: "1px solid rgba(16,185,129,0.20)",
+            color: "#10B981",
+          }}
+        >
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "#10B981" }} />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "#10B981" }} />
           </span>
-          <span>RAG Engine: 99.9%</span>
+          RAG Engine · 99.9%
         </div>
 
-        {/* Quick New Bot Action */}
+        {/* New Bot */}
         <button
           type="button"
           onClick={onCreateBotClick}
-          className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-all shadow-indigo-600/20 cursor-pointer"
+          className="btn-primary hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold cursor-pointer"
+          style={{ borderRadius: "8px", boxShadow: "0 2px 8px rgba(37,99,235,0.20)" }}
         >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>New Bot</span>
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+            <path d="M6 1v10M1 6h10" stroke="white" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+          New Bot
         </button>
 
         {/* Notifications */}
         <button
           type="button"
           onClick={onOpenNotifications}
-          className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+          className="p-2 cursor-pointer transition-colors rounded-lg"
           title="Notifications"
+          style={{ color: "#94A3B8" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "#F1F5F9";
+            e.currentTarget.style.color = "#64748B";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "#94A3B8";
+          }}
         >
           <Bell className="w-4 h-4" />
         </button>
 
-        {/* Profile Avatar Dropdown */}
-        <div className="relative pl-2 border-l border-slate-800" ref={dropdownRef}>
+        {/* Profile dropdown */}
+        <div
+          className="relative pl-2"
+          style={{ borderLeft: "1px solid rgba(148,163,184,0.30)" }}
+          ref={dropdownRef}
+        >
           <button
             type="button"
-            onClick={() => setIsDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-800/60 transition-colors cursor-pointer focus:outline-none"
+            onClick={() => setIsDropdownOpen((p) => !p)}
+            className="flex items-center gap-2 p-1 cursor-pointer focus:outline-none transition-all rounded-lg"
             aria-expanded={isDropdownOpen}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#F1F5F9")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center font-bold text-xs text-white shadow-sm">
+            <div
+              className="w-7 h-7 flex items-center justify-center text-[12px] font-bold rounded-lg"
+              style={{
+                background: "linear-gradient(135deg, #2563EB, #0284C7)",
+                color: "white",
+              }}
+            >
               {initial}
             </div>
-            <span className="hidden xl:block text-xs font-medium text-slate-200">
+            <span className="hidden xl:block text-[12px] font-medium" style={{ color: "#475569" }}>
               {user?.name || "Arpita"}
             </span>
-            <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />
+            <ChevronDown
+              className={`w-3 h-3 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
+              style={{ color: "#94A3B8" }}
+            />
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-60 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-              <div className="px-4 py-2.5 border-b border-slate-800/80">
-                <p className="text-xs font-semibold text-slate-100 truncate">{user?.name || "Arpita"}</p>
-                <p className="text-[11px] text-slate-400 truncate">{user?.email || "arpita@example.com"}</p>
-                <div className="mt-2 flex items-center gap-1.5 text-[10px] text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full w-fit">
+            <div
+              className="absolute right-0 mt-2 w-56 py-2 animate-slide-down z-50"
+              style={{
+                background: "#FFFFFF",
+                border: "1px solid rgba(148,163,184,0.30)",
+                borderRadius: "12px",
+                boxShadow: "0 12px 40px rgba(15,23,42,0.12)",
+              }}
+            >
+              <div className="px-4 py-2.5" style={{ borderBottom: "1px solid rgba(148,163,184,0.20)" }}>
+                <p className="text-[12px] font-semibold truncate" style={{ color: "#0F172A" }}>
+                  {user?.name || "Arpita"}
+                </p>
+                <p className="text-[10px] truncate mt-0.5" style={{ color: "#94A3B8" }}>
+                  {user?.email || "arpita@example.com"}
+                </p>
+                <div
+                  className="mt-2 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider w-fit px-2 py-0.5 rounded"
+                  style={{
+                    background: "#EFF6FF",
+                    border: "1px solid rgba(37,99,235,0.20)",
+                    color: "#2563EB",
+                  }}
+                >
                   <Shield className="w-2.5 h-2.5" />
-                  <span>Workspace Admin</span>
+                  Admin
                 </div>
               </div>
 
               <div className="py-1">
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    onOpenNotifications?.();
-                  }}
-                  className="w-full px-4 py-2 text-left text-xs text-slate-300 hover:bg-slate-800/70 flex items-center gap-2 cursor-pointer transition-colors"
+                  onClick={() => { setIsDropdownOpen(false); onOpenNotifications?.(); }}
+                  className="w-full px-4 py-2 text-left text-[12px] flex items-center gap-2.5 cursor-pointer transition-colors"
+                  style={{ color: "#475569" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#F8FAFC")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
-                  <User className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Account Settings</span>
+                  <User className="w-3.5 h-3.5" style={{ color: "#94A3B8" }} />
+                  Account Settings
                 </button>
-
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    if (onSignOut) onSignOut();
-                  }}
-                  className="w-full px-4 py-2 text-left text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 cursor-pointer transition-colors"
+                  onClick={() => { setIsDropdownOpen(false); onSignOut?.(); }}
+                  className="w-full px-4 py-2 text-left text-[12px] flex items-center gap-2.5 cursor-pointer transition-colors"
+                  style={{ color: "#EF4444" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#FEF2F2")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
-                  <LogOut className="w-3.5 h-3.5 text-rose-400" />
-                  <span>Sign Out</span>
+                  <LogOut className="w-3.5 h-3.5" />
+                  Sign out
                 </button>
               </div>
             </div>
