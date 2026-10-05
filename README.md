@@ -1,87 +1,127 @@
-# Figbot 🤖🎨
+# FigBot — AI Backend
 
-> An intelligent bot and automation assistant for Figma workflows, design systems, and asset export.
+**No-Code AI Assistant Creation and Deployment Platform**
 
----
-
-## 📌 Overview
-
-**Figbot** is a powerful automation tool designed to streamline design-to-development workflows using Figma. Whether managing design tokens, syncing assets, generating components, or integrating Figma with chat platforms (like Discord or Slack), Figbot automates tedious design operations.
-
----
-
-## ✨ Features
-
-- 🔄 **Automated Asset Sync**: Export icons, vectors, and image assets directly from Figma to your project.
-- 🎨 **Design System Sync**: Extract color palettes, typography, and spacing tokens into JSON/CSS variables.
-- 🤖 **AI Component Generation**: Convert Figma frames into clean code snippets (HTML/CSS, React, Tailwind).
-- 💬 **Bot Integrations**: Receive updates, inspect frames, and trigger builds directly from Discord or Slack.
-- 🛠️ **Figma API Integration**: Built on top of the official Figma REST API.
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18.0 or higher) or [Python](https://www.python.org/) (3.10+)
-- A [Figma Account](https://www.figma.com/) with a Personal Access Token
-
-### Installation
-
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/your-username/Figbot.git
-   cd Figbot
-   ```
-
-2. **Install Dependencies**
-   ```bash
-   npm install
-   # or if using Python:
-   # pip install -r requirements.txt
-   ```
-
-3. **Configure Environment Variables**
-   Create a `.env` file in the root directory:
-   ```env
-   FIGMA_ACCESS_TOKEN=your_figma_personal_access_token
-   FIGMA_FILE_KEY=your_figma_file_key
-   ```
-
----
-
-## 💻 Usage
-
-Run the bot/script:
-
-```bash
-npm start
-# or: python main.py
-```
+> Upload documents → Build knowledge base → Deploy AI assistant → Embed on any website
 
 ---
 
 ## 📁 Project Structure
 
-```text
+```
 Figbot/
-├── src/            # Source code
-├── config/         # Configuration files
-├── .env.example    # Example environment variables
-├── .gitignore      # Git ignore rules
-├── README.md       # Project documentation
-└── package.json    # Dependencies & scripts
+├── ai_backend/
+│   ├── main.py                    # FastAPI app — entry point
+│   ├── requirements.txt           # Python dependencies
+│   ├── .env.example               # Environment variable template
+│   └── core/
+│       ├── document_processor.py  # PDF loading + chunking
+│       ├── vector_store.py        # FAISS index management + hybrid retriever
+│       ├── rag_chain.py           # RAG pipeline + Groq LLM
+│       └── assistant_manager.py   # Chain cache + query entry point
+└── storage/
+    └── indexes/                   # FAISS indexes saved here (per assistant_id)
 ```
 
 ---
 
-## 🤝 Contributing
+## ⚡ Quick Start
 
-Contributions are welcome! Please feel free to submit a Pull Request or open an issue for feature requests and bug fixes.
+### 1. Create a Virtual Environment
+```bash
+cd ai_backend
+python -m venv venv
+venv\Scripts\activate      # Windows
+```
+
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Set Up Environment Variables
+```bash
+copy .env.example .env
+# Edit .env and add your GROQ_API_KEY
+```
+
+### 4. Run the AI Backend
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+API available at: **http://localhost:8000**
+Docs at: **http://localhost:8000/docs**
 
 ---
 
-## 📄 License
+## 🔌 API Endpoints
 
-This project is licensed under the [MIT License](LICENSE).
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | Health check |
+| `POST` | `/upload` | Upload PDFs and build knowledge base |
+| `POST` | `/chat` | Query an assistant |
+| `GET` | `/assistants/{id}/status` | Check if knowledge base is ready |
+| `DELETE` | `/assistants/{id}/reset` | Delete knowledge base |
+
+### Upload Documents
+```bash
+curl -X POST http://localhost:8000/upload \
+  -F "assistant_id=my-assistant-123" \
+  -F "assistant_name=College Assistant" \
+  -F "files=@handbook.pdf" \
+  -F "files=@faq.pdf"
+```
+
+### Chat with Assistant
+```bash
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"assistant_id": "my-assistant-123", "question": "What is the admission process?"}'
+```
+
+---
+
+## 🧠 AI Pipeline
+
+```
+PDF Upload
+    │
+    ▼
+Text Extraction (PyPDFLoader)
+    │
+    ▼
+Chunking (RecursiveCharacterTextSplitter, 1500 chars, 300 overlap)
+    │
+    ▼
+Embedding (HuggingFace all-MiniLM-L6-v2, local, free)
+    │
+    ▼
+FAISS Index (saved to disk per assistant_id)
+    │
+User Query
+    │
+    ▼
+Hybrid Retrieval (BM25 40% + FAISS MMR 60%)
+    │
+    ▼
+Context Prompt → Groq Llama-3.3-70b
+    │
+    ▼
+AI Response
+```
+
+---
+
+## 🔑 Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| AI Framework | LangChain |
+| Embeddings | HuggingFace `all-MiniLM-L6-v2` (local, free) |
+| Vector DB | FAISS (disk-persisted per assistant) |
+| Retrieval | Hybrid BM25 + FAISS MMR |
+| LLM | Groq API — Llama 3.3 70b |
+| API | FastAPI |
+| Server | Uvicorn |
