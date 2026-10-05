@@ -1,0 +1,37 @@
+# ============================================================
+# FigBot Backend — Python Dependencies
+# ============================================================
+
+# API Framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Data Validation
+pydantic
+
+# Environment Variables
+python-dotenv
+
+# LangChain Core
+langchain
+langchain-core
+langchain-community
+langchain-text-splitters
+langchain-classic
+
+# LLM — Groq
+langchain-groq
+
+# Embeddings — HuggingFace (local, free)
+langchain-huggingface
+sentence-transformers
+
+# Vector Store
+faiss-cpu
+
+# Hybrid Retrieval
+rank-bm25
+
+# PDF Loading
+pypdf
